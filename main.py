@@ -43,7 +43,9 @@ class Game:
             while cur_row < self.rows:
                 if self.board[cur_row][c] == self.player_turn:
                     in_row += 1
-                cur_row += 1
+                    cur_row += 1
+                else:
+                    break
             if in_row >= self.to_win:
                 self.end = True
 
@@ -65,16 +67,34 @@ class Game:
             self.end = True
             return
 
-    def check_diag(self, c):  # Nalezy sprawdzic obie przekatne, self.legal(c) -> wiersz w ktorym jest postawiony zeton
-        k, w, score = c, self.legal[
-            c], 1  # Wystarczy robić iteracje po przekatnej (podobnie jak przy poziomie), pilnowac zakresu
-        # print(k, w)
+    def check_diag(self, c):  # Niby git ale wypadałoby przetestować dokladniej
+        k, w, score = c - 1, self.legal[c] - 1, 1
         while k >= 0 and w >= 0:
             if self.board[w][k] == self.player_turn:
                 score += 1
             k -= 1
             w -= 1
-        k, w = c, self.legal[c]
+        k, w = c + 1, self.legal[c] + 1
+        while k < self.columns and w < self.rows:  # tutaj może namieszane
+            if self.board[w][k] == self.player_turn:
+                score += 1
+            k += 1
+            w += 1
+        if score >= self.to_win:
+            self.end = True
+
+        k, w, score = c - 1, self.legal[c] + 1, 1  # Tutaj kod się powtarza, coś wykombinować
+        while k >= 0 and w < self.rows:
+            if self.board[w][k] == self.player_turn:
+                score += 1
+            k -= 1
+            w += 1
+        k, w = c + 1, self.legal[c] - 1
+        while k < self.columns and w >= 0:
+            if self.board[w][k] == self.player_turn:
+                score += 1
+            k += 1
+            w -= 1
         if score >= self.to_win:
             self.end = True
 
