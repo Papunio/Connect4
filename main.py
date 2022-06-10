@@ -10,9 +10,9 @@ class Game:
         self.board = [[' ' for j in range(self.columns)] for i in range(self.rows)]
         self.legal = [self.rows - 1 for _ in range(self.columns)]
         self.end = False
-        self.game_loop()
+        # self.game_loop()
 
-    def game_loop(self):
+    def game_loop(self):  # Nalezy to zmienic pod gui
         while not self.end and self.move_count <= self.columns * self.rows:
             self.draw_board()
             move = int(input(f"Player{self.p + 1} Column> "))
@@ -31,7 +31,18 @@ class Game:
         self.draw_board()
         self.win_screen()
 
-    def check_win(self, c):  # Jeszcze ukosy..
+    def click(self, move):
+        if self.legal[move] == -1:
+            print("This column is full, try again")
+            return
+        self.board[self.legal[move]][move] = self.player_turn
+        self.check_win(move)
+        self.legal[move] -= 1
+        self.player_turn = self.players[self.p]
+        self.p = (self.p + 1) % len(self.players)
+        self.move_count += 1
+
+    def check_win(self, c):
         self.check_column(c)
         self.check_row(c)
         self.check_diag(c)
@@ -98,7 +109,7 @@ class Game:
         if score >= self.to_win:
             self.end = True
 
-    def draw_board(self):
+    def draw_board(self):  # To będzie w gui
         for i in self.board:
             print(i)
         print('----' * self.columns)
@@ -107,7 +118,7 @@ class Game:
             print(f'{j}, ', end='  ')
         print()
 
-    def win_screen(self):
+    def win_screen(self):  # To będzie w gui
         print("-------------------------")
         print(f"Player {self.p} has won!")
         print("Click enter to play again")
@@ -122,7 +133,7 @@ class Game:
         self.board = [[' ' for j in range(self.columns)] for i in range(self.rows)]
         self.legal = [self.rows - 1 for _ in range(self.columns)]
         self.end = False
-        self.game_loop()
+        # self.game_loop()
 
 
 if __name__ == "__main__":
