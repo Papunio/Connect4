@@ -1,5 +1,6 @@
 import tkinter as tk
 from main import Game
+from time import sleep
 
 
 class StartWindow:  # Można jakoś ładniej zrobić.... (canvas? / grid?)
@@ -35,7 +36,6 @@ class StartWindow:  # Można jakoś ładniej zrobić.... (canvas? / grid?)
     def open_game(self):  # Tutaj po prostu odpalamy okno glowne programu
         self.window.withdraw()  # Ukrycie
         main_window = GameWindow(self.rows_slider.get(), self.cols_slider.get())
-        # game = Game(self.rows_slider.get(), self.cols_slider.get())
         # self.window.destroy()
 
 
@@ -55,69 +55,70 @@ class GameWindow:  # Okno główne programu
         self.gui_board = tk.Canvas(self.root, width=self.res_y, height=self.res_x)
         self.gui_board.place(x=0, y=0)
 
-        self.game = Game()
+        self.game = Game(r, c)
 
-        self.draw_gui_board()
+        self.draw_rect_board()
+
+        self.gui_board.bind('<Button-1>', self.clicked)
 
         self.root.mainloop()
 
     def draw_gui_board(self):
-        self.gui_board.delete('all')
+        self.gui_board.delete('oval')
         for i in range(self.r):
             for j in range(self.c):
-                if self.game.board[i][j] == "X":
-                    self.gui_board.create_rectangle((self.size + 2 * self.space) * j + self.space,
-                                                    (self.size + 2 * self.space) * i + self.space,
-                                                    self.size + (self.size + 2 * self.space) * j + self.space,
-                                                    self.size + (self.size + 2 * self.space) * i + self.space,
-                                                    fill='#c93e34',
-                                                    tags=f'{i},{j}')
-                    self.gui_board.tag_bind(f'{i},{j}', '<Button-1>', self.clicked)
-                elif self.game.board[i][j] == "O":
-                    self.gui_board.create_rectangle((self.size + 2 * self.space) * j + self.space,
-                                                    (self.size + 2 * self.space) * i + self.space,
-                                                    self.size + (self.size + 2 * self.space) * j + self.space,
-                                                    self.size + (self.size + 2 * self.space) * i + self.space,
-                                                    fill='#4653db',
-                                                    tags=f'{i},{j}')
-                    self.gui_board.tag_bind(f'{i},{j}', '<Button-1>', self.clicked)
-                else:
-                    self.gui_board.create_rectangle((self.size + 2 * self.space) * j + self.space,
-                                                    (self.size + 2 * self.space) * i + self.space,
-                                                    self.size + (self.size + 2 * self.space) * j + self.space,
-                                                    self.size + (self.size + 2 * self.space) * i + self.space,
-                                                    fill='#f1c40f',
-                                                    tags=f'{i},{j}')
-                    self.gui_board.tag_bind(f'{i},{j}', '<Button-1>', self.clicked)
+                if self.game.board[i][j] == "X":  # Kolor zolty
+                    self.draw_oval(i, j, '#f1c40f')
+                elif self.game.board[i][j] == "O":  # Kolor czerwony
+                    self.draw_oval(i, j, '#c93e34')
+
+    def draw_rect_board(self):
+        for i in range(self.r):
+            for j in range(self.c):
+                self.gui_board.create_rectangle((self.size + 2 * self.space) * j + self.space,
+                                                (self.size + 2 * self.space) * i + self.space,
+                                                self.size + (self.size + 2 * self.space) * j + self.space,
+                                                self.size + (self.size + 2 * self.space) * i + self.space,
+                                                fill='#4653db',
+                                                outline='white')
+
+    def draw_oval(self, i, j, c):
+        self.gui_board.create_oval((self.size + 2 * self.space) * j + self.space + 1,
+                                   (self.size + 2 * self.space) * i + self.space + 1,
+                                   self.size + (self.size + 2 * self.space) * j + self.space - 1,
+                                   self.size + (self.size + 2 * self.space) * i + self.space - 1,
+                                   fill=c,
+                                   outline=c)  # Czy jednak zostawic czarne
 
     def clicked(self, event):  # Klopoty z precyzja przy space > 0
-        self.game.click(event.x // self.size)
+        self.game.click(event.x // (self.size + self.space))
         self.draw_gui_board()
         if self.game.end:
             self.win_screen()
 
-    def win_screen(self):  # Można zrobić ładniej
-        self.root.withdraw()
-        self.win = tk.Tk()
-        self.win.title("Connect4")
-        self.win.geometry("200x50")
-        self.win.resizable(False, False)
-        if self.game.player_turn == "O":
-            winner = tk.Label(self.win, text="Red player won!")
+    def win_screen(self):  # Trzeba zrobić ładniej
+        if self.game.player_turn == "O":  # Zrobic ladniejsze, czystszy kod
+            self.w1 = tk.Label(self.root, text="Yellow player won!")
+            self.w2 = tk.Label(self.root, text="Press space to play again")
         else:
-            winner = tk.Label(self.win, text="Blue player won!")
+            self.w1 = tk.Label(self.root, text="Red player won!")
+            self.w2 = tk.Label(self.root, text="Click to play again")
 
-        reset_button = tk.Button(self.win, text="Rematch", command=self.reset_game)
+        self.w1.pack()
+        self.w2.pack()
+        self.gui_board.unbind("<Button-1>")
+        self.root.bind("<space>", self.reset_game)
 
-        winner.pack()
-        reset_button.pack()
-        self.win.mainloop()
-
-    def reset_game(self):
+    def reset_game(self, event):
+        self.root.unbind("<space>")
+        self.w1.destroy()
+        self.w2.destroy()
         self.game.reset()
-        self.root.deiconify()
-        self.draw_gui_board()
-        self.win.destroy()
+        self.gui_board.bind('<Button-1>', self.clicked)
+        self.draw_rect_board()
+
+    def empty(self, event):
+        pass
 
 
 if __name__ == "__main__":
