@@ -3,33 +3,13 @@ class Game:
         self.columns = c
         self.rows = r
         self.to_win = w
-        self.players = ['O', 'X']
-        self.p = 0
+        self.players = [1, 2]
         self.move_count = 0
-        self.player_turn = 'X'
-        self.board = [[' ' for j in range(self.columns)] for i in range(self.rows)]
+        self.player_turn = 1
+        self.board = [[0 for j in range(self.columns)] for i in range(self.rows)]
         self.legal = [self.rows - 1 for _ in range(self.columns)]
         self.end = False
-        # self.game_loop()
-
-    def game_loop(self):  # Nalezy to zmienic pod gui
-        while not self.end and self.move_count <= self.columns * self.rows:
-            self.draw_board()
-            move = int(input(f"Player{self.p + 1} Column> "))
-            if move > self.columns or move < 0:
-                print("Wrong column number, try again")
-                continue
-            if self.legal[move] == -1:
-                print("This column is full, try again")
-                continue
-            self.board[self.legal[move]][move] = self.player_turn
-            self.check_win(move)
-            self.legal[move] -= 1
-            self.player_turn = self.players[self.p]
-            self.p = (self.p + 1) % len(self.players)
-            self.move_count += 1
-        self.draw_board()
-        self.win_screen()
+        self.tie = False
 
     def click(self, move):
         if self.legal[move] == -1:
@@ -38,26 +18,27 @@ class Game:
         self.board[self.legal[move]][move] = self.player_turn
         self.check_win(move)
         self.legal[move] -= 1
-        self.player_turn = self.players[self.p]
-        self.p = (self.p + 1) % len(self.players)
+        self.player_turn = 1 if self.player_turn == 2 else 2
         self.move_count += 1
+        if self.move_count >= self.columns * self.rows and not self.end:
+            self.tie = True
 
-    def check_win(self, c):
+    def check_win(self, c):  # Ogólnie można pozbyć się tych wszystkich brzydkich breakow odpowiednim warunkiem stopu
         self.check_column(c)
         self.check_row(c)
         self.check_diag(c)
 
     def check_column(self, c):
         if self.legal[c] + self.to_win <= self.rows:
-            in_row = 1
+            in_column = 1
             cur_row = self.legal[c] + 1
             while cur_row < self.rows:
                 if self.board[cur_row][c] == self.player_turn:
-                    in_row += 1
+                    in_column += 1
                     cur_row += 1
                 else:
                     break
-            if in_row >= self.to_win:
+            if in_column >= self.to_win:
                 self.end = True
 
     def check_row(self, c):
@@ -78,62 +59,52 @@ class Game:
             self.end = True
             return
 
-    def check_diag(self, c):  # Niby git ale wypadałoby przetestować dokladniej
+    def check_diag(self, c):  # Tutaj kod się powtarza, coś wykombinować
         k, w, score = c - 1, self.legal[c] - 1, 1
         while k >= 0 and w >= 0:
             if self.board[w][k] == self.player_turn:
                 score += 1
-            k -= 1
-            w -= 1
+                k -= 1
+                w -= 1
+            else:
+                break
         k, w = c + 1, self.legal[c] + 1
-        while k < self.columns and w < self.rows:  # tutaj może namieszane
+        while k < self.columns and w < self.rows:
             if self.board[w][k] == self.player_turn:
                 score += 1
-            k += 1
-            w += 1
+                k += 1
+                w += 1
+            else:
+                break
         if score >= self.to_win:
             self.end = True
 
-        k, w, score = c - 1, self.legal[c] + 1, 1  # Tutaj kod się powtarza, coś wykombinować
+        k, w, score = c - 1, self.legal[c] + 1, 1
         while k >= 0 and w < self.rows:
             if self.board[w][k] == self.player_turn:
                 score += 1
-            k -= 1
-            w += 1
+                k -= 1
+                w += 1
+            else:
+                break
         k, w = c + 1, self.legal[c] - 1
         while k < self.columns and w >= 0:
             if self.board[w][k] == self.player_turn:
                 score += 1
-            k += 1
-            w -= 1
+                k += 1
+                w -= 1
+            else:
+                break
         if score >= self.to_win:
             self.end = True
 
-    def draw_board(self):  # To będzie w gui
-        for i in self.board:
-            print(i)
-        print('----' * self.columns)
-        print('  ', end='')
-        for j in range(self.columns):
-            print(f'{j}, ', end='  ')
-        print()
-
-    def win_screen(self):  # To będzie w gui
-        print("-------------------------")
-        print(f"Player {self.p} has won!")
-        print("Click enter to play again")
-        print("-------------------------")
-        input()
-        self.reset()
-
     def reset(self):
-        self.p = 0
         self.move_count = 0
-        self.player_turn = 'X'
-        self.board = [[' ' for j in range(self.columns)] for i in range(self.rows)]
+        self.player_turn = 1
+        self.board = [[0 for j in range(self.columns)] for i in range(self.rows)]
         self.legal = [self.rows - 1 for _ in range(self.columns)]
         self.end = False
-        # self.game_loop()
+        self.tie = False
 
 
 if __name__ == "__main__":
