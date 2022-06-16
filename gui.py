@@ -95,27 +95,24 @@ class GameWindow:  # Okno główne programu
     def clicked(self, event):
         self.game.click(event.x // self.size)
         self.draw_gui_board()
-        if self.game.tie:
-            self.tie_screen()
         if self.game.end:
-            self.win_screen()
+            self.win_tie_screen(True)
+        elif self.game.tie:
+            self.win_tie_screen(False)
+
         self.root.title('Yellow player turn' if self.game.player_turn == 1 else 'Red player turn')
 
-    def win_screen(self):
-        self.w1 = tk.Label(self.root,
-                           text='Red player won' if self.game.player_turn == 1 else 'Yellow player won')
-        self.rsmsg = tk.Label(self.root, text="Press space to play again")  # To samo
+    def win_tie_screen(self, w):
+        if w:
+            self.w1 = tk.Label(self.root,
+                               text='Red player won' if self.game.player_turn == 1 else 'Yellow player won')
+            self.w1.pack()
 
-        self.w1.pack()
-        self.rsmsg.pack()
-        self.gui_board.unbind("<Button-1>")
-        self.root.bind("<space>", self.reset_game)
+        else:
+            self.tie = tk.Label(self.root, text="Its a tie!")
+            self.tie.pack()
 
-    def tie_screen(self):
-        self.tie = tk.Label(self.root, text="Its a tie!")
-        self.rsmsg = tk.Label(self.root, text="Press space to play again")  # To samo
-
-        self.tie.pack()
+        self.rsmsg = tk.Label(self.root, text="Press space to play again")
         self.rsmsg.pack()
         self.gui_board.unbind("<Button-1>")
         self.root.bind("<space>", self.reset_game)
@@ -123,12 +120,11 @@ class GameWindow:  # Okno główne programu
     def reset_game(self, event):
         self.root.unbind("<space>")
         self.w1.destroy()
-
         self.tie.destroy()
         self.rsmsg.destroy()
         self.game.reset()
         self.gui_board.bind('<Button-1>', self.clicked)
-        self.root.title("Yellow player turn")
+        self.root.title("Yellow player turn")  # Zmienna
         self.draw_rect_board()
 
     def empty(self, event):

@@ -23,7 +23,7 @@ class Game:
         if self.move_count >= self.columns * self.rows and not self.end:
             self.tie = True
 
-    def check_win(self, c):  # Ogólnie można pozbyć się tych wszystkich brzydkich breakow odpowiednim warunkiem stopu
+    def check_win(self, c):
         self.check_column(c)
         self.check_row(c)
         self.check_diag(c)
@@ -32,69 +32,50 @@ class Game:
         if self.legal[c] + self.to_win <= self.rows:
             in_column = 1
             cur_row = self.legal[c] + 1
-            while cur_row < self.rows:
-                if self.board[cur_row][c] == self.player_turn:
-                    in_column += 1
-                    cur_row += 1
-                else:
-                    break
+            while cur_row < self.rows and self.board[cur_row][c] == self.player_turn:
+                in_column += 1
+                cur_row += 1
             if in_column >= self.to_win:
                 self.end = True
 
     def check_row(self, c):
         i, j, in_row = c - 1, c + 1, 1
-        while i >= 0:
-            if self.board[self.legal[c]][i] == self.player_turn:
-                in_row += 1
-                i -= 1
-            else:
-                break
-        while j < self.rows:
-            if self.board[self.legal[c]][j] == self.player_turn:
-                in_row += 1
-                j += 1
-            else:
-                break
+        while i >= 0 and self.board[self.legal[c]][i] == self.player_turn:
+            in_row += 1
+            i -= 1
+
+        while j < self.rows and self.board[self.legal[c]][j] == self.player_turn:
+            in_row += 1
+            j += 1
         if in_row >= self.to_win:
             self.end = True
-            return
 
     def check_diag(self, c):  # Tutaj kod się powtarza, coś wykombinować
         k, w, score = c - 1, self.legal[c] - 1, 1
-        while k >= 0 and w >= 0:
-            if self.board[w][k] == self.player_turn:
-                score += 1
-                k -= 1
-                w -= 1
-            else:
-                break
+        while k >= 0 and w >= 0 and self.board[w][k] == self.player_turn:
+            score += 1
+            k -= 1
+            w -= 1
+
         k, w = c + 1, self.legal[c] + 1
-        while k < self.columns and w < self.rows:
-            if self.board[w][k] == self.player_turn:
-                score += 1
-                k += 1
-                w += 1
-            else:
-                break
+        while k < self.columns and w < self.rows and self.board[w][k] == self.player_turn:
+            score += 1
+            k += 1
+            w += 1
         if score >= self.to_win:
             self.end = True
 
         k, w, score = c - 1, self.legal[c] + 1, 1
-        while k >= 0 and w < self.rows:
-            if self.board[w][k] == self.player_turn:
-                score += 1
-                k -= 1
-                w += 1
-            else:
-                break
+        while k >= 0 and w < self.rows and self.board[w][k] == self.player_turn:
+            score += 1
+            k -= 1
+            w += 1
+
         k, w = c + 1, self.legal[c] - 1
-        while k < self.columns and w >= 0:
-            if self.board[w][k] == self.player_turn:
-                score += 1
-                k += 1
-                w -= 1
-            else:
-                break
+        while k < self.columns and w >= 0 and self.board[w][k] == self.player_turn:
+            score += 1
+            k += 1
+            w -= 1
         if score >= self.to_win:
             self.end = True
 
