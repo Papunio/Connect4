@@ -2,7 +2,7 @@ import tkinter as tk
 from main import Game
 
 
-class StartWindow:  # Można jakoś ładniej zrobić.... (canvas? / grid?)
+class StartWindow:  # Można jakoś ładniej zrobić.... (canvas? / grid?) Chyba wypadałoby napisać od nowa..
     def __init__(self):
         self.window = tk.Tk()
         self.window.title("Connect4")

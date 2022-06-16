@@ -50,7 +50,7 @@ class Game:
         if in_row >= self.to_win:
             self.end = True
 
-    def check_diag(self, c):  # Tutaj kod się powtarza, coś wykombinować
+    def check_diag(self, c):
         k, w, score = c - 1, self.legal[c] - 1, 1
         while k >= 0 and w >= 0 and self.board[w][k] == self.player_turn:
             score += 1
